@@ -25,4 +25,4 @@ curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/i
 - 📶 /64 IPv6 subnet atanmış olmalı
   
 
-Tested By [Hetzner](https://hetzner.cloud/?ref=vMPh0SiWfCW3) Cloud Servers.
+Tested By [Hetzner](https://hetzner.cloud/?ref=vMPh0SiWfCW3) Cloud Servers. & Sponsored By [CsaDigital](https://csadigital.net/)

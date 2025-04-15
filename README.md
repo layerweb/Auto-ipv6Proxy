@@ -12,7 +12,7 @@ curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/i
 
 # Script Özellikleri
 
-- ✅ Otomatik Squid proxy kurulumu
+- ✅ Otomatik 3proxy proxy kurulumu
 - ✅ Rastgele IPv6 jenerasyonu (/64 subnet üzerinden)
 - ✅ Proxy kullanıcı adı/şifre desteği
 - ✅ Ubuntu 24-20 LTS Desteği

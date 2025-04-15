@@ -4,7 +4,7 @@ Sistem yöneticileri ve ağ profesyonellerinin işlerini kolaylaştırmak amacı
 
 ## 🚀 Tek Komutla Kurulum
 
-Hiçbir dosyayı elle indirmenize gerek yok. Sadece aşağıdaki komutu terminalinize yapıştırın ve script otomatik olarak kurulumu tamamlasın:
+Hiçbir dosyayı elle indirmenize gerek yok. Sadece aşağıdaki komutu terminalinize yapıştırın ve script otomatik olarak kurulumu yönlendirmeleriniz ile tamamlasın:
 
 ```bash
 curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/install.sh | bash

@@ -1,4 +1,4 @@
-# 🧠 Otomatik IPv6 Proxy Kurulumu
+# 🌍 Otomatik IPv6 Proxy Kurulumu
 
 Sistem yöneticileri ve ağ profesyonellerinin işlerini kolaylaştırmak amacıyla **tek komutla IPv6 proxy** kurulumu yapabilecekleri basit bir script hazırladık. Bu script ile birkaç saniye içinde kendi IPv6 proxy'nizi kurabilir, zaman kaybetmeden kullanıma hazır hale getirebilirsiniz.
 

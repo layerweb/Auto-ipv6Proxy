@@ -15,7 +15,8 @@ curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/i
 - ✅ Otomatik 3proxy proxy kurulumu
 - ✅ Rastgele IPv6 jenerasyonu (/64 subnet üzerinden)
 - ✅ Proxy kullanıcı adı/şifre desteği
-- ✅ Ubuntu 24-20 LTS Desteği
+- ✅ (Opsiyonel) Whitelist IP Auth Method
+- ✅ Universal Linux Desteği
 - ✅ Proxy IP listesi otomatik oluşturulur
 
 # Gereksinimler

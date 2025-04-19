@@ -21,7 +21,7 @@ curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/i
 
 # Gereksinimler
 
-- 🌍 IPv6 destekli bir VDS (KVM önerilir)
+- 🖥️ IPv6 destekli bir VDS (KVM önerilir)
 - 🔑 Root yetkisine sahip bir kullanıcı
 - 📶 /64 IPv6 subnet atanmış olmalı
   

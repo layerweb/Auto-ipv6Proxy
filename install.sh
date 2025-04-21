@@ -23,6 +23,7 @@ install_packages() {
         wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.deb
         dpkg -i 3proxy-0.9.5.x86_64.deb || apt-get install -f -y
     elif command -v dnf >/dev/null 2>&1; then
+        dnf update -y
         dnf install -y wget dialog iproute
         wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.rpm
         rpm -ivh 3proxy-0.9.5.x86_64.rpm

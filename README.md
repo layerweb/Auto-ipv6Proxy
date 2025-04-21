@@ -24,6 +24,8 @@ curl https://raw.githubusercontent.com/layerweb/Auto-ipv6Proxy/refs/heads/main/i
 - 🖥️ IPv6 destekli bir X86-64 VDS (KVM önerilir)
 - 🔑 Root yetkisine sahip bir kullanıcı
 - 📶 /64 IPv6 subnet atanmış olmalı
+
+Youtube: [https://youtu.be/UZfALUON3k8](https://youtu.be/UZfALUON3k8)
   
 
 Tested By [Hetzner](https://hetzner.cloud/?ref=vMPh0SiWfCW3) Cloud Servers & Sponsored By [CsaDigital](https://csadigital.net/).

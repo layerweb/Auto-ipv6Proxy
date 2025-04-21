@@ -6,8 +6,43 @@ GREEN="\e[32m"
 BOLD="\e[1m"
 RESET="\e[0m"
 
+# Log dosyası tanımı ve log fonksiyonları
+LOG_FILE="/var/log/ipv6proxy_install.log"
+
 log() {
+    # Hem ekrana hem log dosyasına yaz
     echo -e "${GREEN}${BOLD}$1${RESET}"
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] $1" >> "$LOG_FILE"
+}
+
+error_exit() {
+    # Hata durumunda hem ekrana hem log dosyasına yazıp çık
+    echo -e "${BOLD}\e[31m$1${RESET}" >&2
+    echo "[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1" >> "$LOG_FILE"
+    exit 1
+}
+
+# 3proxy konfigürasyonu ve IPv6 atamalarını yedekle
+backup_configs() {
+    log "3proxy konfigürasyonu ve IPv6 atamalarının yedeği alınıyor..."
+    cp /etc/3proxy/3proxy.cfg /etc/3proxy/3proxy.cfg.bak 2>>"$LOG_FILE" || log "/etc/3proxy/3proxy.cfg yedeklenemedi."
+    ip -6 addr show | grep inet6 | awk '{print $2, $NF}' > /root/ipv6-assigned.bak 2>>"$LOG_FILE" || log "IPv6 atamaları yedeklenemedi."
+    log "Yedekleme tamamlandı."
+}
+
+# Yedekten geri yükleme işlemi
+restore_configs() {
+    log "Yedekler geri yükleniyor..."
+    if [ -f /etc/3proxy/3proxy.cfg.bak ]; then
+        cp /etc/3proxy/3proxy.cfg.bak /etc/3proxy/3proxy.cfg
+        log "3proxy.cfg geri yüklendi."
+    fi
+    if [ -f /root/ipv6-assigned.bak ]; then
+        while read -r addr iface; do
+            ip -6 addr add "$addr" dev "$iface" 2>>"$LOG_FILE" || log "$addr $iface atanamadı."
+        done < /root/ipv6-assigned.bak
+        log "IPv6 adresleri geri yüklendi."
+    fi
 }
 
 whiptail_prompt() {
@@ -18,18 +53,27 @@ whiptail_prompt() {
 
 install_packages() {
     if command -v apt >/dev/null 2>&1; then
-        apt-get update
-        apt-get install -y wget whiptail iproute2
-        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.deb
-        dpkg -i 3proxy-0.9.5.x86_64.deb || apt-get install -f -y
+        apt-get update >>"$LOG_FILE" 2>&1 || error_exit "apt-get update başarısız."
+        apt-get install -y wget whiptail iproute2 >>"$LOG_FILE" 2>&1 || error_exit "Gerekli paketler kurulamadı (apt)."
+        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.deb >>"$LOG_FILE" 2>&1 || error_exit "3proxy deb indirilemedi."
+        dpkg -i 3proxy-0.9.5.x86_64.deb >>"$LOG_FILE" 2>&1 || apt-get install -f -y >>"$LOG_FILE" 2>&1 || error_exit "3proxy kurulumu başarısız (apt)."
     elif command -v dnf >/dev/null 2>&1; then
-        dnf update -y
-        dnf install -y wget dialog iproute
-        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.rpm
-        rpm -ivh 3proxy-0.9.5.x86_64.rpm
+        dnf update -y >>"$LOG_FILE" 2>&1 || error_exit "dnf update başarısız."
+        dnf install -y wget dialog iproute >>"$LOG_FILE" 2>&1 || error_exit "Gerekli paketler kurulamadı (dnf)."
+        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy rpm indirilemedi."
+        rpm -ivh 3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy kurulumu başarısız (dnf)."
+    elif command -v yum >/dev/null 2>&1; then
+        yum update -y >>"$LOG_FILE" 2>&1 || error_exit "yum update başarısız."
+        yum install -y wget dialog iproute >>"$LOG_FILE" 2>&1 || error_exit "Gerekli paketler kurulamadı (yum)."
+        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy rpm indirilemedi."
+        rpm -ivh 3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy kurulumu başarısız (yum)."
+    elif command -v zypper >/dev/null 2>&1; then
+        zypper refresh >>"$LOG_FILE" 2>&1 || error_exit "zypper refresh başarısız."
+        zypper install -y wget dialog iproute2 >>"$LOG_FILE" 2>&1 || error_exit "Gerekli paketler kurulamadı (zypper)."
+        wget https://github.com/3proxy/3proxy/releases/download/0.9.5/3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy rpm indirilemedi."
+        rpm -ivh 3proxy-0.9.5.x86_64.rpm >>"$LOG_FILE" 2>&1 || error_exit "3proxy kurulumu başarısız (zypper)."
     else
-        echo "❌ Desteklenmeyen sistem. APT ya da DNF bulunamadı."
-        exit 1
+        error_exit "❌ Desteklenmeyen sistem. APT, DNF, YUM, ZYPPER bulunamadı."
     fi
 }
 
@@ -41,6 +85,33 @@ if [ ! -f /ipv6lw ]; then
     touch /ipv6lw
     log "Kurulum tamamlandı."
 fi
+
+# Script başında kullanıcıya işlem seçtiren menü
+CHOICE=$(whiptail --title "İşlem Seçin" --menu "Ne yapmak istersiniz?" 15 60 4 \
+"INSTALL" "Kurulum / Güncelleme" \
+"BACKUP" "Yedek Al" \
+"RESTORE" "Yedekten Geri Yükle (config + IPv6)" \
+"EXIT" "Çıkış" 3>&1 1>&2 2>&3)
+
+case $CHOICE in
+    INSTALL)
+        log "Kurulum veya güncelleme başlatılıyor..."
+        ;;
+    BACKUP)
+        backup_configs
+        log "Yedekleme işlemi tamamlandı. Script sonlandırılıyor."
+        exit 0
+        ;;
+    RESTORE)
+        restore_configs
+        log "Geri yükleme işlemi tamamlandı. Script sonlandırılıyor."
+        exit 0
+        ;;
+    EXIT)
+        log "Kullanıcı tarafından çıkış seçildi. Script sonlandırılıyor."
+        exit 0
+        ;;
+esac
 
 AuthType=$(whiptail --title "Kimlik Doğrulama Türü" --menu "Bir kimlik doğrulama yöntemi seçin:" 15 60 2 \
 "PASS" "Kullanıcı adı / şifre ile" \
@@ -134,3 +205,6 @@ for ip in "${IPv6_Array[@]}"; do
     ((Port++))
     echo "TCP/$Port    IPv6: $ip"
 done
+
+log "Kurulum tamamlandı."
+exit 0
